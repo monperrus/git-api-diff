@@ -1,0 +1,48 @@
+#!/bin/bash
+# list modified Java methods between the current branch and master
+#
+# usage: 
+# git ls-modified-methods
+# git ls-modified-methods master src/test
+
+
+DIFFBRANCH=master
+if [[ ! -z $1 ]]
+then
+  DIFFBRANCH=$1
+fi
+
+DIFFPATH=.
+if [[ ! -z $2 ]]
+then
+  DIFFPATH=$2
+fi
+
+
+if [[ ! -d .git ]]
+then
+  echo not a git repo
+  exit -1
+fi
+
+if [[ -f .gitattributes ]]
+then
+  cp .gitattributes .gitattributes.bak
+fi
+
+# TODO: check that java-ls-methods-with-hash has been well registered in .git/config
+# TODO: check that cachetextconv = true in .git/config
+
+echo "*.java diff=java-ls-methods-with-hash" > .gitattributes
+
+git --no-pager diff --no-prefix --word-diff -U0 $DIFFBRANCH `find $DIFFPATH -name "*.java"` | grep -v "^\{+" \
+| grep "\{+" 
+
+
+
+
+# cleanup
+if [[ -f .gitattributes.bak ]]
+then
+  cp .gitattributes.bak .gitattributes
+fi

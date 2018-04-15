@@ -1,0 +1,34 @@
+#!/bin/bash
+# list new Java methods between the current branch and master
+
+DIFFBRANCH=master
+if [[ ! -z $1 ]]
+then
+  DIFFBRANCH=$1
+fi
+
+if [[ ! -d .git ]]
+then
+  echo not a git repo
+  exit -1
+fi
+
+if [[ -f .gitattributes ]]
+then
+  cp .gitattributes .gitattributes.bak
+fi
+
+# TODO: check that added-deleted-new-methods has been well registered in .git/config
+# TODO: check that cachetextconv = true in .git/config
+
+echo "*.java diff=added-deleted-new-methods" > .gitattributes
+
+git --no-pager diff  -U0 $DIFFBRANCH `find . -name "*.java"`
+
+
+
+# cleanup
+if [[ -f .gitattributes.bak ]]
+then
+  cp .gitattributes.bak .gitattributes
+fi
